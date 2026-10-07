@@ -1,4 +1,5 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 
 @using Playr.Models
 @using Playr.Services
@@ -9,17 +10,15 @@
 
 <section class="hero">
 
-    <div class="hero-content">
-        <span class="hero-label">DISCOVER YOUR NEXT GAME</span>
+    <span class="hero-label">DISCOVER YOUR NEXT GAME</span>
 
-        <h1>
-            Find something worth <span>playing.</span>
-        </h1>
+    <h1>
+        Find something worth <span>playing.</span>
+    </h1>
 
-        <p>
-            Discover popular games from thousands of titles on Steam.
-        </p>
-    </div>
+    <p>
+        Discover popular games from thousands of titles on Steam.
+    </p>
 
 </section>
 
@@ -42,8 +41,8 @@
 
         @foreach (var game in games)
         {
-            <a class="game-card"
-               href="/game/@game.AppId">
+            <div class="game-card"
+                 @onclick="() => OpenGame(game)">
 
                 <div class="image-container">
 
@@ -61,33 +60,29 @@
                     <h3>@game.Name</h3>
 
                     <p class="genre">
-                        @FormatGenres(game.Genres)
+                        @game.Genres
                     </p>
 
                     <div class="game-footer">
 
-                        <span class="reviews">
+                        <span>
                             @FormatReviews(game.Positive + game.Negative) reviews
                         </span>
 
                         @if (game.Price == 0)
                         {
-                            <span class="price free">
-                                Free
-                            </span>
+                            <span class="free">Free</span>
                         }
                         else if (game.Price.HasValue)
                         {
-                            <span class="price">
-                                €@game.Price.Value.ToString("0.00")
-                            </span>
+                            <span>€@game.Price.Value.ToString("0.00")</span>
                         }
 
                     </div>
 
                 </div>
 
-            </a>
+            </div>
         }
 
     </div>
@@ -95,16 +90,148 @@
 </section>
 
 
+@if (selectedGame != null)
+{
+    <div class="modal-background"
+         @onclick="CloseGame">
+
+        <div class="game-modal"
+             @onclick:stopPropagation="true">
+
+            <button class="close-button"
+                    @onclick="CloseGame">
+                ×
+            </button>
+
+            <img class="modal-image"
+                 src="@selectedGame.HeaderImage"
+                 alt="@selectedGame.Name" />
+
+            <div class="game-modal-content">
+
+                <h2>@selectedGame.Name</h2>
+
+                <div class="modal-rating">
+                    <span>
+                        @GetRating(selectedGame)% positive
+                    </span>
+
+                    <span class="review-count">
+                        @FormatReviews(selectedGame.Positive + selectedGame.Negative) reviews
+                    </span>
+                </div>
+
+
+                <div class="details-grid">
+
+                    <div>
+                        <span>Developer</span>
+                        <strong>@selectedGame.Developers</strong>
+                    </div>
+
+                    <div>
+                        <span>Publisher</span>
+                        <strong>@selectedGame.Publishers</strong>
+                    </div>
+
+                    <div>
+                        <span>Release date</span>
+                        <strong>
+                            @(selectedGame.ReleaseDate?.ToString("dd MMM yyyy") ?? "Unknown")
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Price</span>
+                        <strong>@GetPrice(selectedGame)</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="modal-section">
+
+                    <span class="modal-section-title">
+                        GENRES
+                    </span>
+
+                    <div class="tags">
+                        @foreach (var genre in SplitValues(selectedGame.Genres))
+                        {
+                            <span>@genre</span>
+                        }
+                    </div>
+
+                </div>
+
+
+                <div class="modal-section">
+
+                    <span class="modal-section-title">
+                        CATEGORIES
+                    </span>
+
+                    <div class="tags">
+                        @foreach (var category in SplitValues(selectedGame.Categories))
+                        {
+                            <span>@category</span>
+                        }
+                    </div>
+
+                </div>
+
+
+                <div class="modal-section">
+
+                    <span class="modal-section-title">
+                        TAGS
+                    </span>
+
+                    <div class="tags">
+                        @foreach (var tag in SplitValues(selectedGame.Tags).Take(12))
+                        {
+                            <span>@tag</span>
+                        }
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+
+
 @code {
 
     private List<Game> games = new();
+    private Game? selectedGame;
 
+
+    // Laadt de populairste games wanneer de pagina wordt geopend
     protected override void OnInitialized()
     {
         games = Recommender.GetMostPopular();
     }
 
 
+    // Opent de popup van de aangeklikte game
+    private void OpenGame(Game game)
+    {
+        selectedGame = game;
+    }
+
+
+    // Sluit de popup
+    private void CloseGame()
+    {
+        selectedGame = null;
+    }
+
+
+    // Berekent het percentage positieve reviews van een game
     private int GetRating(Game game)
     {
         int totalReviews = game.Positive + game.Negative;
@@ -120,6 +247,7 @@
     }
 
 
+    // Maakt grote reviewaantallen korter, bijvoorbeeld 12500 naar 12.5K
     private string FormatReviews(int reviews)
     {
         if (reviews >= 1_000_000)
@@ -136,14 +264,37 @@
     }
 
 
-    private string FormatGenres(string genres)
+    // Zet de prijs om naar een leesbare tekst
+    private string GetPrice(Game game)
     {
-        if (string.IsNullOrWhiteSpace(genres))
+        if (!game.Price.HasValue)
         {
-            return "No genre available";
+            return "Unknown";
         }
 
-        return genres;
+        if (game.Price.Value == 0)
+        {
+            return "Free";
+        }
+
+        return $"€{game.Price.Value:0.00}";
+    }
+
+
+    // Splitst genres, categorieën en tags zodat ze apart getoond kunnen worden
+    private IEnumerable<string> SplitValues(string values)
+    {
+        if (string.IsNullOrWhiteSpace(values))
+        {
+            return Array.Empty<string>();
+        }
+
+        return values
+            .Split(
+                new[] { ',', ';' },
+                StringSplitOptions.RemoveEmptyEntries
+            )
+            .Select(value => value.Trim());
     }
 
 }
