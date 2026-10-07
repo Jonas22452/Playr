@@ -13,23 +13,13 @@ namespace Playr.Services
             _gameRepository = gameRepository;
         }
 
-        public List<Game> GetMostPlayed()
+        public List<Game> GetMostPopular()
         {
             return _gameRepository
                 .GetAll()
-                .OrderByDescending(game => game.AveragePlaytime ?? 0)
+                .OrderByDescending(game => game.Positive + game.Negative)
                 .Take(10)
-                .ToList(); //geef 10 meest gespeelde games terug op basis van average gametime
-        }
-
-        public List<Game> GetHighestRated()
-        {
-            return _gameRepository
-                .GetAll()
-                .Where(game => game.Positive + game.Negative >= 1000)
-                .OrderByDescending(game => (double)game.Positive / (game.Positive + game.Negative))
-                .Take(10)
-                .ToList(); //geef 10 hoogst rated games terug
+                .ToList(); // Geef 10 populairste games terug op basis van aantal reviews
         }
     }
 }
