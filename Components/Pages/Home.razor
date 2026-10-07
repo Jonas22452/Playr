@@ -1,7 +1,149 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+@using Playr.Models
+@using Playr.Services
 
-<h1>Hello, world!</h1>
+@inject BasicRecommender Recommender
 
-Welcome to your new app.
+<PageTitle>Playr</PageTitle>
+
+<section class="hero">
+
+    <div class="hero-content">
+        <span class="hero-label">DISCOVER YOUR NEXT GAME</span>
+
+        <h1>
+            Find something worth <span>playing.</span>
+        </h1>
+
+        <p>
+            Discover popular games from thousands of titles on Steam.
+        </p>
+    </div>
+
+</section>
+
+
+<section class="games-section">
+
+    <div class="section-header">
+        <div>
+            <span class="section-label">DISCOVER</span>
+            <h2>Most Popular</h2>
+        </div>
+
+        <span class="game-count">
+            Top @games.Count games
+        </span>
+    </div>
+
+
+    <div class="game-grid">
+
+        @foreach (var game in games)
+        {
+            <a class="game-card"
+               href="/game/@game.AppId">
+
+                <div class="image-container">
+
+                    <img src="@game.HeaderImage"
+                         alt="@game.Name" />
+
+                    <div class="rating">
+                        @GetRating(game)%
+                    </div>
+
+                </div>
+
+                <div class="game-info">
+
+                    <h3>@game.Name</h3>
+
+                    <p class="genre">
+                        @FormatGenres(game.Genres)
+                    </p>
+
+                    <div class="game-footer">
+
+                        <span class="reviews">
+                            @FormatReviews(game.Positive + game.Negative) reviews
+                        </span>
+
+                        @if (game.Price == 0)
+                        {
+                            <span class="price free">
+                                Free
+                            </span>
+                        }
+                        else if (game.Price.HasValue)
+                        {
+                            <span class="price">
+                                €@game.Price.Value.ToString("0.00")
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+
+            </a>
+        }
+
+    </div>
+
+</section>
+
+
+@code {
+
+    private List<Game> games = new();
+
+    protected override void OnInitialized()
+    {
+        games = Recommender.GetMostPopular();
+    }
+
+
+    private int GetRating(Game game)
+    {
+        int totalReviews = game.Positive + game.Negative;
+
+        if (totalReviews == 0)
+        {
+            return 0;
+        }
+
+        return (int)Math.Round(
+            (double)game.Positive / totalReviews * 100
+        );
+    }
+
+
+    private string FormatReviews(int reviews)
+    {
+        if (reviews >= 1_000_000)
+        {
+            return $"{reviews / 1_000_000.0:0.0}M";
+        }
+
+        if (reviews >= 1_000)
+        {
+            return $"{reviews / 1_000.0:0.#}K";
+        }
+
+        return reviews.ToString();
+    }
+
+
+    private string FormatGenres(string genres)
+    {
+        if (string.IsNullOrWhiteSpace(genres))
+        {
+            return "No genre available";
+        }
+
+        return genres;
+    }
+
+}
