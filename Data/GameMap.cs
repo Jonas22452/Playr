@@ -21,6 +21,7 @@ namespace Playr.Data
             Map(g => g.AveragePlaytime).Name("Average playtime forever");
             Map(g => g.Developers).Name("Developers");
             Map(g => g.Publishers).Name("Publishers");
+            Map(g => g.Categories).Name("Categories");
             Map(g => g.Genres).Name("Genres");
             Map(g => g.Tags).Name("Tags");
         }
