@@ -17,7 +17,7 @@ namespace Playr.Services
         {
             return _gameRepository
                 .GetAll()
-                .OrderByDescending(game => game.AveragePlaytime)
+                .OrderByDescending(game => game.AveragePlaytime ?? 0)
                 .Take(10)
                 .ToList(); //geef 10 meest gespeelde games terug op basis van average gametime
         }
@@ -30,7 +30,6 @@ namespace Playr.Services
                 .OrderByDescending(game => (double)game.Positive / (game.Positive + game.Negative))
                 .Take(10)
                 .ToList(); //geef 10 hoogst rated games terug
-
         }
     }
 }
