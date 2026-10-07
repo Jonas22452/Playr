@@ -1,4 +1,6 @@
 using Playr.Components;
+using Playr.Repositories;
+using Playr.Services;
 
 namespace Playr
 {
@@ -12,7 +14,23 @@ namespace Playr
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
+            builder.Services.AddSingleton<GameRepository>();
+            builder.Services.AddSingleton<BasicRecommender>();
+
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var recommender = scope.ServiceProvider.GetRequiredService<BasicRecommender>();
+
+                var games = recommender.GetMostPopular();
+
+                foreach (var game in games)
+                {
+                    Console.WriteLine($"{game.Name} - {game.AveragePlaytime}");
+                }
+            }
+
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -29,6 +47,11 @@ namespace Playr
 
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
+
+            app.MapGet("/api/recommendations", (BasicRecommender recommender) =>
+            {
+                return recommender.GetMostPopular();
+            });
 
             app.Run();
         }
