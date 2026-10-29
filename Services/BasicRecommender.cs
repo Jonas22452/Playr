@@ -18,8 +18,8 @@ namespace Playr.Services
             return _gameRepository
                 .GetAll()
                 .OrderByDescending(game => game.Positive + game.Negative)
-                .Take(10)
-                .ToList(); // Geef 10 populairste games terug op basis van aantal reviews
+                .Take(50) // n = aantal games dat je wilt zien
+                .ToList(); // Geef n populairste games terug op basis van aantal reviews
         }
     }
 }

@@ -1,0 +1,26 @@
+{
+  "name": "playr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev:css": "tailwindcss -i ./Styles/input.css -o ./wwwroot/tailwind.css --watch",
+    "build:css": "tailwindcss -i ./Styles/input.css -o ./wwwroot/tailwind.css --minify"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jonas22452/Playr.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Jonas22452/Playr/issues"
+  },
+  "homepage": "https://github.com/Jonas22452/Playr#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}

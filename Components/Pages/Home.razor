@@ -1,197 +1,529 @@
 ﻿@page "/"
+@implements IAsyncDisposable
 @rendermode InteractiveServer
 
 @using Playr.Models
 @using Playr.Services
-
 @inject BasicRecommender Recommender
 
-<PageTitle>Playr</PageTitle>
+<PageTitle>Playr - Discover</PageTitle>
 
-<section class="hero">
+<div id="playr-scroll-nav"
+     class="playr-scroll-nav"
+     aria-label="Page scroll navigation">
+</div>
 
-    <span class="hero-label">DISCOVER YOUR NEXT GAME</span>
+<div class="min-h-screen bg-[#171719] text-[#eeeeef] lg:flex">
 
-    <h1>
-        Find something worth <span>playing.</span>
-    </h1>
+    <aside class="fixed inset-y-0 left-0 z-40 hidden w-[280px] flex-col border-r border-white/5 bg-[#191a1e] px-6 py-8 lg:flex">
 
-    <p>
-        Discover popular games from thousands of titles on Steam.
-    </p>
+        <a href="#top"
+           class="mb-14 flex items-center gap-3 !text-white !no-underline">
 
-</section>
-
-
-<section class="games-section">
-
-    <div class="section-header">
-        <div>
-            <span class="section-label">DISCOVER</span>
-            <h2>Most Popular</h2>
-        </div>
-
-        <span class="game-count">
-            Top @games.Count games
-        </span>
-    </div>
-
-
-    <div class="game-grid">
-
-        @foreach (var game in games)
-        {
-            <div class="game-card"
-                 @onclick="() => OpenGame(game)">
-
-                <div class="image-container">
-
-                    <img src="@game.HeaderImage"
-                         alt="@game.Name" />
-
-                    <div class="rating">
-                        @GetRating(game)%
-                    </div>
-
-                </div>
-
-                <div class="game-info">
-
-                    <h3>@game.Name</h3>
-
-                    <p class="genre">
-                        @game.Genres
-                    </p>
-
-                    <div class="game-footer">
-
-                        <span>
-                            @FormatReviews(game.Positive + game.Negative) reviews
-                        </span>
-
-                        @if (game.Price == 0)
-                        {
-                            <span class="free">Free</span>
-                        }
-                        else if (game.Price.HasValue)
-                        {
-                            <span>€@game.Price.Value.ToString("0.00")</span>
-                        }
-
-                    </div>
-
-                </div>
-
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#e9ebef] text-xl font-extrabold text-[#20232b]">
+                P
             </div>
-        }
+
+            <span class="text-2xl font-extrabold tracking-tight text-white">
+                playr<span class="text-[#829bc3]">.</span>
+            </span>
+        </a>
+
+        <nav class="flex-1 space-y-2">
+
+            <button type="button"
+                    @onclick="ToggleHomeMenu"
+                    aria-expanded="@homeMenuOpen"
+                    class="group flex w-full items-center gap-3 rounded-xl border-0 bg-[#303b4d] px-4 py-3.5 text-left text-sm font-semibold text-white transition-colors hover:bg-[#394860]">
+
+                <svg class="h-5 w-5 shrink-0 text-[#a8c0e4]"
+                     viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" />
+                </svg>
+
+                <span class="flex-1">Home</span>
+
+                <svg class="h-4 w-4 shrink-0 text-[#9db8df] transition-transform duration-200 @(homeMenuOpen ? "rotate-180" : "")"
+                     viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m6 9 6 6 6-6" />
+                </svg>
+            </button>
+
+            @if (homeMenuOpen)
+            {
+                <div class="ml-5 space-y-1 border-l border-[#404a5a] py-2 pl-4">
+
+                    <a href="#top"
+                       class="flex min-h-10 items-center gap-3 rounded-lg px-3 py-2.5 !text-[#aeb8ca] !no-underline transition-colors hover:bg-[#292d36] hover:!text-white">
+
+                        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="1.8"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z" />
+                        </svg>
+
+                        <span class="whitespace-nowrap text-sm font-medium">
+                            Featured Picks
+                        </span>
+                    </a>
+
+                    <a href="/#games"
+                       class="flex min-h-10 items-center gap-3 rounded-lg px-3 py-2.5 !text-[#aeb8ca] !no-underline transition-colors hover:bg-[#292d36] hover:!text-white">
+
+                        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="1.8"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                        </svg>
+
+                        <span class="whitespace-nowrap text-sm font-medium">
+                            Games
+                        </span>
+                    </a>
+
+                </div>
+            }
+
+            <a href="/library"
+               class="flex items-center gap-3 rounded-xl px-4 py-3.5 !text-[#a0a7b4] !no-underline transition-colors hover:bg-[#292d36] hover:!text-white">
+
+                <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="5" height="16" rx="1" />
+                    <rect x="10" y="4" width="5" height="16" rx="1" />
+                    <path d="m17 6 4 13" />
+                </svg>
+
+                <span class="text-sm font-medium">Library</span>
+            </a>
+
+        </nav>
+
+    </aside>
+
+    <div class="min-w-0 flex-1 lg:ml-[280px]">
+        <div id="top" class="absolute top-0"></div>
+        <header class="flex h-22 w-full items-center gap-5 border-b border-white/5 px-5 sm:px-8 lg:px-10">
+
+            <div class="flex items-center gap-3 lg:hidden">
+                <span class="text-xl font-extrabold text-white">PLAYR</span>
+            </div>
+
+            <div class="w-full max-w-md">
+                <input type="search"
+                       @bind="searchText"
+                       @bind:event="oninput"
+                       placeholder="Search games..."
+                       class="w-full rounded-2xl border-0 bg-[#282b33] px-5 py-3 text-sm text-white outline-none ring-0 placeholder:text-[#9295a0] focus:outline-none focus:ring-0" />
+            </div>
+
+        </header>
+
+        <main class="mx-auto max-w-[1500px] px-5 py-7 sm:px-8 lg:px-10">
+
+            @if (featuredGame != null)
+            {
+                <div class="mb-5 flex items-center justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#8da7cd]">Discover something new</p>
+                        <h2 class="mt-1 text-xl font-semibold tracking-tight text-white">Featured picks</h2>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <section id="discover"
+                             aria-label="Featured games"
+                             class="min-w-0 overflow-hidden rounded-3xl bg-[#2a2d35] shadow-[0_20px_65px_rgba(0,0,0,0.22)] lg:h-[600px]">
+
+                        <div class="grid h-full lg:grid-cols-[minmax(0,1.9fr)_minmax(280px,1fr)]">
+
+                            <div class="group relative min-h-65 overflow-hidden sm:min-h-90 lg:h-full lg:min-h-0">
+
+                                @if (previousFeaturedGame != null)
+                                {
+                                    <img @key="previousFeaturedGame.AppId"
+                                         src="@previousFeaturedGame.HeaderImage"
+                                         alt=""
+                                         class="playr-carousel-out absolute inset-0 h-full w-full object-cover" />
+                                }
+
+                                <img @key="featuredGame.AppId"
+                                     src="@featuredGame.HeaderImage"
+                                     alt="@featuredGame.Name"
+                                     class="playr-carousel-in absolute inset-0 h-full w-full object-cover" />
+
+                                <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent"></div>
+
+                                <span class="pointer-events-none absolute bottom-6 left-7 rounded-full bg-black/45 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md">
+                                    EDITOR'S PICK
+                                </span>
+
+                            </div>
+
+                            <div class="flex h-full min-h-0 flex-col justify-between gap-5 overflow-hidden bg-[#292c34] p-7 sm:p-8">
+
+                                <div @key="featuredGame.AppId" class="playr-carousel-content-in">
+
+                                    <span class="text-xs font-semibold tracking-[0.15em] text-[#a9b3c4]">
+                                        FEATURED GAME
+                                    </span>
+
+                                    <h1 class="mt-4 text-3xl leading-tight font-bold tracking-tight text-white">
+                                        @featuredGame.Name
+                                    </h1>
+
+                                    <p class="mt-3 text-sm text-[#a3a7b2]">
+                                        @featuredGame.Developers
+                                    </p>
+
+                                    <div class="mt-6 flex flex-wrap gap-2">
+                                        @foreach (var genre in SplitValues(featuredGame.Genres).Take(5))
+                                        {
+                                            <span class="rounded-full bg-[#454b58] px-3 py-1.5 text-xs text-[#dce1e9]">
+                                                @genre
+                                            </span>
+                                        }
+                                    </div>
+
+                                </div>
+
+                                <div>
+
+                                    <div class="mb-6 border-t border-white/10 pt-6">
+
+                                        <div class="flex items-center justify-between gap-4">
+
+                                            <div>
+                                                <p class="text-xs text-[#9da4b1]">
+                                                    Player rating
+                                                </p>
+
+                                                <p class="mt-2 text-lg font-bold text-[#a6e3b8]">
+                                                    @GetRating(featuredGame)% positive
+                                                </p>
+                                            </div>
+
+                                            <div class="text-right">
+                                                <p class="text-xs text-[#9da4b1]">
+                                                    Reviews
+                                                </p>
+
+                                                <p class="mt-2 text-lg font-semibold text-white">
+                                                    @FormatReviews(featuredGame.Positive + featuredGame.Negative)
+                                                </p>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <button type="button"
+                                            @onclick="() => OpenGame(featuredGame)"
+                                            class="flex w-full items-center justify-center gap-3 rounded-xl bg-[#7e9bc5] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#91b2e5]">
+                                        Explore Game
+                                        <span>↗</span>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    <button type="button" @onclick="PreviousFeatured" aria-label="Previous featured game"
+                            class="group absolute top-1/2 -left-14 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-2xl border-0 bg-[#292d37] text-[#9db8df] outline-none shadow-[0_8px_28px_rgba(0,0,0,0.3)] transition-all duration-300 hover:-translate-x-1 hover:bg-[#405472] hover:text-white hover:shadow-[0_0_25px_rgba(126,155,197,0.22)] focus-visible:ring-2 focus-visible:ring-[#8da9d3] max-xl:-left-4">
+                        <svg class="h-5 w-5 transition-transform duration-300 group-hover:-translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+                    </button>
+
+                    <button type="button" @onclick="NextFeatured" aria-label="Next featured game"
+                            class="group absolute top-1/2 -right-14 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-2xl border-0 bg-[#292d37] text-[#9db8df] outline-none shadow-[0_8px_28px_rgba(0,0,0,0.3)] transition-all duration-300 hover:translate-x-1 hover:bg-[#405472] hover:text-white hover:shadow-[0_0_25px_rgba(126,155,197,0.22)] focus-visible:ring-2 focus-visible:ring-[#8da9d3] max-xl:-right-4">
+                        <svg class="h-5 w-5 transition-transform duration-300 group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+                    </button>
+
+                </div>
+
+            }
+
+            <section id="games" class="mt-12">
+
+                <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+
+                    <div>
+                        <div class="mb-2 flex items-center gap-2">
+                            <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8da9d3]">
+                                Explore
+                            </span>
+                        </div>
+                        <h2 class="text-2xl font-semibold tracking-tight text-white">
+                            Maybe You'll Like
+                        </h2>
+                        <p class="mt-1 text-sm text-[#9397a2]">
+                            Discover popular games on Steam
+                        </p>
+                    </div>
+
+                    <div class="relative w-48">
+                        <select @bind="sortBy"
+                                aria-label="Sort games"
+                                class="w-full appearance-none rounded-xl border-0 bg-[#343944] px-4 py-3 pr-10 text-sm font-medium text-white outline-none ring-0 transition hover:bg-[#414754] focus:border-transparent focus:outline-none focus:ring-0">
+                            <option value="popular">Most Popular</option>
+                            <option value="rated">Highest Rated</option>
+                            <option value="name">Name A-Z</option>
+                        </select>
+                        <svg class="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-slate-400"
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
+                        </svg>
+                    </div>
+
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+
+                    @foreach (var game in filteredGames)
+                    {
+                        <button @key="game.AppId"
+                                type="button"
+                                @onclick="() => OpenGame(game)"
+                                class="group relative min-w-0 overflow-hidden rounded-2xl bg-[#282b33] text-left transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(0,0,0,0.4)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e9bc5]">
+
+                            <div class="relative aspect-[1.45] overflow-hidden">
+
+                                <img src="@game.HeaderImage"
+                                     alt="@game.Name"
+                                     loading="lazy"
+                                     class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+
+                                <div class="absolute inset-0 bg-gradient-to-t from-[#171719]/95 via-transparent to-transparent"></div>
+
+                                <div class="absolute right-4 bottom-4 left-4">
+
+                                    <h3 class="truncate text-xl font-bold text-white">
+                                        @game.Name
+                                    </h3>
+
+                                    <div class="mt-2 flex items-center justify-between gap-3">
+                                        <span class="truncate text-xs text-[#e1e2e6]">
+                                            @FirstGenre(game.Genres)
+                                        </span>
+
+                                        <span class="shrink-0 rounded-full bg-black/60 px-2.5 py-1 text-xs font-semibold text-[#a5e8b9] backdrop-blur-md">
+                                            @GetRating(game)%
+                                        </span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </button>
+                    }
+
+                </div>
+
+                @if (filteredGames.Count == 0)
+                {
+                    <div class="rounded-2xl bg-[#282b33] p-12 text-center text-[#a5a8b2]">
+                        No games found.
+                    </div>
+                }
+
+            </section>
+
+        </main>
 
     </div>
 
-</section>
-
+</div>
 
 @if (selectedGame != null)
 {
-    <div class="modal-background"
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
          @onclick="CloseGame">
 
-        <div class="game-modal"
+        <div class="relative w-full max-w-3xl overflow-hidden rounded-3xl bg-[#292c34] shadow-2xl"
              @onclick:stopPropagation="true">
 
-            <button class="close-button"
-                    @onclick="CloseGame">
+            <button type="button"
+                    @onclick="CloseGame"
+                    aria-label="Close game details"
+                    class="absolute top-5 right-7 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/80 text-xl text-white shadow-lg transition hover:bg-[#414754]">
                 ×
             </button>
 
-            <img class="modal-image"
-                 src="@selectedGame.HeaderImage"
-                 alt="@selectedGame.Name" />
+            <div class="playr-modal-scroll max-h-[90vh] overflow-y-auto">
 
-            <div class="game-modal-content">
+                <div class="relative h-60 sm:h-80">
 
-                <h2>@selectedGame.Name</h2>
+                    <img src="@selectedGame.HeaderImage"
+                         alt="@selectedGame.Name"
+                         class="h-full w-full object-cover" />
 
-                <div class="modal-rating">
-                    <span>
-                        @GetRating(selectedGame)% positive
-                    </span>
-
-                    <span class="review-count">
-                        @FormatReviews(selectedGame.Positive + selectedGame.Negative) reviews
-                    </span>
-                </div>
-
-
-                <div class="details-grid">
-
-                    <div>
-                        <span>Developer</span>
-                        <strong>@selectedGame.Developers</strong>
-                    </div>
-
-                    <div>
-                        <span>Publisher</span>
-                        <strong>@selectedGame.Publishers</strong>
-                    </div>
-
-                    <div>
-                        <span>Release date</span>
-                        <strong>
-                            @(selectedGame.ReleaseDate?.ToString("dd MMM yyyy") ?? "Unknown")
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>Price</span>
-                        <strong>@GetPrice(selectedGame)</strong>
-                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#292c34] via-transparent to-transparent"></div>
 
                 </div>
 
+                <div class="px-7 pb-9 sm:px-10">
 
-                <div class="modal-section">
+                    <h2 class="text-3xl font-bold text-white">
+                        @selectedGame.Name
+                    </h2>
 
-                    <span class="modal-section-title">
-                        GENRES
-                    </span>
+                    <div class="mt-4 flex flex-wrap items-center gap-4">
 
-                    <div class="tags">
-                        @foreach (var genre in SplitValues(selectedGame.Genres))
-                        {
-                            <span>@genre</span>
-                        }
+                        <span class="rounded-full bg-[#3b5b4a] px-3 py-1.5 text-sm font-semibold text-[#b4efc7]">
+                            @GetRating(selectedGame)% positive
+                        </span>
+
+                        <span class="text-sm text-[#afb3bd]">
+                            @FormatReviews(selectedGame.Positive + selectedGame.Negative) reviews
+                        </span>
+
                     </div>
 
-                </div>
+                    <div class="mt-8 grid grid-cols-2 gap-6 border-y border-white/10 py-6 sm:grid-cols-4">
 
+                        <div>
+                            <p class="text-xs text-[#9296a2]">Developer</p>
+                            <p class="mt-2 text-sm font-semibold text-white">@selectedGame.Developers</p>
+                        </div>
 
-                <div class="modal-section">
+                        <div>
+                            <p class="text-xs text-[#9296a2]">Publisher</p>
+                            <p class="mt-2 text-sm font-semibold text-white">@selectedGame.Publishers</p>
+                        </div>
 
-                    <span class="modal-section-title">
-                        CATEGORIES
-                    </span>
+                        <div>
+                            <p class="text-xs text-[#9296a2]">Release date</p>
+                            <p class="mt-2 text-sm font-semibold text-white">
+                                @(selectedGame.ReleaseDate?.ToString("dd MMM yyyy") ?? "Unknown")
+                            </p>
+                        </div>
 
-                    <div class="tags">
-                        @foreach (var category in SplitValues(selectedGame.Categories))
-                        {
-                            <span>@category</span>
-                        }
+                        <div>
+                            <p class="text-xs text-[#9296a2]">Price</p>
+                            <p class="mt-2 text-sm font-semibold text-white">@GetPrice(selectedGame)</p>
+                        </div>
+
                     </div>
 
-                </div>
+                    <div class="mt-8">
+                        <h3 class="mb-4 text-sm font-semibold text-white">
+                            Genres
+                        </h3>
 
+                        <div class="flex flex-wrap gap-2">
+                            @foreach (var genre in SplitValues(selectedGame.Genres))
+                            {
+                                <span class="rounded-lg bg-[#414754] px-3 py-2 text-xs text-slate-200">
+                                    @genre
+                                </span>
+                            }
+                        </div>
+                    </div>
 
-                <div class="modal-section">
+                    <div class="mt-8 border-t border-white/10 pt-6">
 
-                    <span class="modal-section-title">
-                        TAGS
-                    </span>
+                        <button type="button"
+                                @onclick="ToggleExtraDetails"
+                                aria-expanded="@showExtraDetails"
+                                class="flex w-full items-center justify-between rounded-xl bg-[#343944] px-5 py-4 text-left transition-colors duration-200 hover:bg-[#414754]">
 
-                    <div class="tags">
-                        @foreach (var tag in SplitValues(selectedGame.Tags).Take(12))
-                        {
-                            <span>@tag</span>
-                        }
+                            <div>
+                                <span class="block text-sm font-semibold text-white">
+                                    Additional game details
+                                </span>
+
+                                <span class="mt-1 block text-xs text-[#a4a9b4]">
+                                    Categories, features and community tags
+                                </span>
+                            </div>
+
+                            <svg class="h-5 w-5 shrink-0 text-slate-300 transition-transform duration-300 @(showExtraDetails ? "rotate-180" : "")"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor"
+                                 stroke-width="2">
+                                <path stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      d="m6 9 6 6 6-6" />
+                            </svg>
+
+                        </button>
+
+                        <div class="playr-details-panel @(showExtraDetails ? "is-open" : "")">
+                            <div class="playr-details-inner">
+
+                                <div class="pt-6">
+
+                                    <h3 class="mb-3 text-sm font-semibold text-white">
+                                        Categories
+                                    </h3>
+
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach (var category in SplitValues(selectedGame.Categories))
+                                        {
+                                            <span class="rounded-lg bg-[#414754] px-3 py-2 text-xs text-slate-300">
+                                                @category
+                                            </span>
+                                        }
+                                    </div>
+
+                                </div>
+
+                                <div class="mt-7 pb-2">
+
+                                    <h3 class="mb-3 text-sm font-semibold text-white">
+                                        Community Tags
+                                    </h3>
+
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach (var tag in SplitValues(selectedGame.Tags).Take(12))
+                                        {
+                                            <span class="rounded-lg bg-[#414754] px-3 py-2 text-xs text-slate-300">
+                                                @tag
+                                            </span>
+                                        }
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="mt-8 flex justify-end border-t border-white/10 pt-6">
+
+                        <a href="@($"https://store.steampowered.com/app/{selectedGame.AppId}/")"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="inline-flex items-center gap-2 rounded-xl bg-[#7e9bc5] px-5 py-3 text-sm font-semibold !text-white !no-underline transition-colors hover:bg-[#91b2e5]">
+
+                            View on Steam
+
+                            <svg class="h-4 w-4"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor"
+                                 stroke-width="2">
+                                <path stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      d="M7 17 17 7M8 7h9v9" />
+                            </svg>
+
+                        </a>
+
                     </div>
 
                 </div>
@@ -201,100 +533,4 @@
         </div>
 
     </div>
-}
-
-
-@code {
-
-    private List<Game> games = new();
-    private Game? selectedGame;
-
-
-    // Laadt de populairste games wanneer de pagina wordt geopend
-    protected override void OnInitialized()
-    {
-        games = Recommender.GetMostPopular();
-    }
-
-
-    // Opent de popup van de aangeklikte game
-    private void OpenGame(Game game)
-    {
-        selectedGame = game;
-    }
-
-
-    // Sluit de popup
-    private void CloseGame()
-    {
-        selectedGame = null;
-    }
-
-
-    // Berekent het percentage positieve reviews van een game
-    private int GetRating(Game game)
-    {
-        int totalReviews = game.Positive + game.Negative;
-
-        if (totalReviews == 0)
-        {
-            return 0;
-        }
-
-        return (int)Math.Round(
-            (double)game.Positive / totalReviews * 100
-        );
-    }
-
-
-    // Maakt grote reviewaantallen korter, bijvoorbeeld 12500 naar 12.5K
-    private string FormatReviews(int reviews)
-    {
-        if (reviews >= 1_000_000)
-        {
-            return $"{reviews / 1_000_000.0:0.0}M";
-        }
-
-        if (reviews >= 1_000)
-        {
-            return $"{reviews / 1_000.0:0.#}K";
-        }
-
-        return reviews.ToString();
-    }
-
-
-    // Zet de prijs om naar een leesbare tekst
-    private string GetPrice(Game game)
-    {
-        if (!game.Price.HasValue)
-        {
-            return "Unknown";
-        }
-
-        if (game.Price.Value == 0)
-        {
-            return "Free";
-        }
-
-        return $"€{game.Price.Value:0.00}";
-    }
-
-
-    // Splitst genres, categorieën en tags zodat ze apart getoond kunnen worden
-    private IEnumerable<string> SplitValues(string values)
-    {
-        if (string.IsNullOrWhiteSpace(values))
-        {
-            return Array.Empty<string>();
-        }
-
-        return values
-            .Split(
-                new[] { ',', ';' },
-                StringSplitOptions.RemoveEmptyEntries
-            )
-            .Select(value => value.Trim());
-    }
-
 }

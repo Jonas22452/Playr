@@ -1,0 +1,277 @@
+﻿@import "tailwindcss";
+@source "../Components";
+
+@theme {
+    --font-sans: "Inter", "Segoe UI", sans-serif;
+    --color-playr-bg: #171719;
+    --color-playr-panel: #292c34;
+    --color-playr-accent: #7e9bc5;
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+        font-family: "Inter", "Segoe UI", sans-serif;
+    }
+
+    body {
+        margin: 0;
+        background: #171719;
+        color: #eeeeef;
+        font-family: "Inter", "Segoe UI", sans-serif;
+    }
+
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    button, input, select {
+        font: inherit;
+    }
+
+    button {
+        cursor: pointer;
+    }
+}
+
+/* Remove link styles from older app.css or Bootstrap. */
+aside a, aside a:hover, aside a:focus, aside a:visited,
+a[href^="https://store.steampowered.com/"] {
+    text-decoration: none !important;
+}
+
+/* Scrollbar inside the game popup. */
+.playr-modal-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #505663 transparent;
+}
+
+    .playr-modal-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .playr-modal-scroll::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .playr-modal-scroll::-webkit-scrollbar-thumb {
+        background: #505663;
+        border-radius: 10px;
+    }
+
+/* Slide-open category and tag section. */
+.playr-details-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 350ms ease, opacity 250ms ease;
+}
+
+    .playr-details-panel.is-open {
+        grid-template-rows: 1fr;
+        opacity: 1;
+    }
+
+.playr-details-inner {
+    min-height: 0;
+    overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .playr-details-panel {
+        transition: none;
+    }
+}
+
+
+input[type="search"],
+input[type="search"]:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+
+
+/* Featured carousel animations */
+
+@keyframes playr-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes playr-fade-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes playr-content-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.playr-carousel-in {
+    animation: playr-fade-in 650ms ease both;
+}
+
+.playr-carousel-out {
+    animation: playr-fade-out 650ms ease both;
+    pointer-events: none;
+}
+
+.playr-carousel-content-in {
+    animation: playr-content-in 500ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .playr-carousel-in,
+    .playr-carousel-out,
+    .playr-carousel-content-in {
+        animation: none;
+    }
+}
+
+aside nav a,
+aside nav a:visited,
+aside nav a:hover,
+aside nav a:focus {
+    text-decoration: none !important;
+}
+
+/* Override any existing sidebar link color rules. */
+aside nav a, aside nav a:visited, aside nav a:hover, aside nav a:focus {
+    text-decoration: none !important;
+}
+
+#discover,
+#games {
+    scroll-margin-top: 24px;
+}
+
+/* Hide native scrollbar, keep scrolling enabled */
+html {
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+}
+
+    html::-webkit-scrollbar {
+        display: none;
+    }
+
+/* Floating navigation */
+.playr-scroll-nav {
+    position: fixed;
+    right: 17px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 5px;
+}
+
+/* Each clickable section */
+.playr-scroll-step {
+    width: 28px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: height 350ms ease;
+}
+
+    .playr-scroll-step.is-active {
+        height: 64px;
+    }
+
+/* Gray inactive dots */
+.playr-scroll-shape {
+    display: block;
+    width: 13px;
+    height: 13px;
+    border-radius: 999px;
+    background: #777b86;
+    overflow: hidden;
+    transition: width 350ms ease, height 350ms ease, background-color 350ms ease, box-shadow 350ms ease;
+}
+
+/* Active blue pill */
+.playr-scroll-step.is-active .playr-scroll-shape {
+    width: 17px;
+    height: 56px;
+    background: #7e9bc5;
+    box-shadow: 0 0 18px rgba(126, 155, 197, 0.25);
+}
+
+
+.playr-scroll-step.is-active .playr-scroll-shape {
+    position: relative;
+}
+
+.playr-scroll-step:not(.is-active):hover .playr-scroll-shape {
+    background: #a9b9d1;
+    transform: scale(1.12);
+}
+
+.playr-scroll-step:focus-visible {
+    outline: 2px solid #9db8df;
+    outline-offset: 3px;
+    border-radius: 8px;
+}
+
+/* Don't crowd smaller screens */
+@media (max-width: 1023px) {
+    .playr-scroll-nav {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .playr-scroll-step,
+    .playr-scroll-shape {
+        transition: none;
+    }
+}
+
+.playr-scroll-nav[hidden] {
+    display: none;
+}
+
+
+/* Remove any remaining white dot or overlay */
+.playr-scroll-step .playr-scroll-shape::before,
+.playr-scroll-step .playr-scroll-shape::after {
+    content: none !important;
+    display: none !important;
+}
+
+/* Solid blue active indicator */
+.playr-scroll-step.is-active .playr-scroll-shape {
+    background: #7e9bc5 !important;
+    background-image: none !important;
+}
