@@ -9,9 +9,17 @@ namespace Playr.Repositories
     {
         private readonly List<Game> _games; //we can't change the list --- _games indicates it's a private field
 
-        public GameRepository()
+        public GameRepository(IWebHostEnvironment environment)
         {
-            using var reader = new StreamReader("Data/games.csv");
+            var csvPath = Path.Combine(environment.ContentRootPath, "Data", "games.csv");
+            if (!File.Exists(csvPath))
+            {
+                throw new FileNotFoundException(
+                    "Data/games.csv ontbreekt. Zet de lokale dataset in de Data-map naast Playr.csproj.",
+                    csvPath);
+            }
+
+            using var reader = new StreamReader(csvPath);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
             csv.Context.RegisterClassMap<GameMap>(); //uses GameMap to map the CSV columns to the Game properties

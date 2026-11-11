@@ -19,19 +19,8 @@ namespace Playr
 
             var app = builder.Build();
 
-            using (var scope = app.Services.CreateScope())
-            {
-                var recommender = scope.ServiceProvider.GetRequiredService<BasicRecommender>();
-
-                var games = recommender.GetMostPopular();
-
-                foreach (var game in games)
-                {
-                    Console.WriteLine($"{game.Name} - {game.AveragePlaytime}");
-                }
-            }
-
-
+            // Check at startup that the local CSV is mounted and readable.
+            app.Services.GetRequiredService<GameRepository>();
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
@@ -39,8 +28,6 @@ namespace Playr
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
-            app.UseHttpsRedirection();
 
             app.UseStaticFiles();
             app.UseAntiforgery();

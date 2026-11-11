@@ -8,6 +8,7 @@
 
 <PageTitle>Playr - Discover</PageTitle>
 
+@* Zwevende scrolnavigatie; de knoppen worden gemaakt in wwwroot/js/playr-scroll.js. *@
 <div id="playr-scroll-nav"
      class="playr-scroll-nav"
      aria-label="Page scroll navigation">
@@ -15,6 +16,7 @@
 
 <div class="min-h-screen bg-[#171719] text-[#eeeeef] lg:flex">
 
+    @* Zijbalk: Home-links en de route naar Library. *@
     <aside class="fixed inset-y-0 left-0 z-40 hidden w-[280px] flex-col border-r border-white/5 bg-[#191a1e] px-6 py-8 lg:flex">
 
         <a href="#top"
@@ -111,6 +113,7 @@
 
     <div class="min-w-0 flex-1 lg:ml-[280px]">
         <div id="top" class="absolute top-0"></div>
+        @* Zoekbalk: filtert de aanbevelingen die hieronder als kaarten staan. *@
         <header class="flex h-22 w-full items-center gap-5 border-b border-white/5 px-5 sm:px-8 lg:px-10">
 
             <div class="flex items-center gap-3 lg:hidden">
@@ -129,6 +132,7 @@
 
         <main class="mx-auto max-w-[1500px] px-5 py-7 sm:px-8 lg:px-10">
 
+            @* Uitgelicht spel: de wisselknoppen en timer zitten in Home.razor.cs. *@
             @if (featuredGame != null)
             {
                 <div class="mb-5 flex items-center justify-between gap-4">
@@ -254,6 +258,7 @@
 
             }
 
+            @* Spellenoverzicht: kaarten, zoeken en sorteren. *@
             <section id="games" class="mt-12">
 
                 <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
@@ -346,6 +351,7 @@
 
 </div>
 
+@* Detailvenster voor de gekozen kaart; OpenGame en CloseGame staan in Home.razor.cs. *@
 @if (selectedGame != null)
 {
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
