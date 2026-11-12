@@ -4,29 +4,29 @@ Playr toont populaire games uit een lokale Steam-dataset. Op de startpagina kun 
 
 ## Opstarten
 
-Je hebt Git, Docker Desktop en `games.csv` nodig. Zorg dat Docker Desktop draait.
+Je hebt Git en een draaiende Docker Desktop nodig. De repository bevat een voorbeelddataset; `games.csv` is optioneel.
 
 ```powershell
 git clone https://github.com/Jonas22452/Playr.git
 cd Playr
 ```
 
-Zet `games.csv` in de map `Data`, zodat het bestand op `Data/games.csv` staat. De data blijft lokaal en zit niet in de repository.
+Wil je de volledige dataset gebruiken, zet dan `games.csv` in de map `Data`, zodat het bestand op `Data/games.csv` staat. Playr kiest dit bestand eerst. Zonder volledige dataset gebruikt Playr automatisch `SampleData/games.csv`. De volledige dataset blijft lokaal en wordt niet in de Docker-image of repository opgenomen.
 
 Start Playr de eerste keer met:
 
 ```powershell
-docker compose up --build
+docker compose up --build -d
 ```
 
-Open daarna http://localhost:8080. De eerste build kan een paar minuten duren. Bij volgende keren volstaat `docker compose up`. Gebruik `--build` opnieuw als je de code of afhankelijkheden hebt aangepast.
+Open daarna http://localhost:8080. De eerste build kan een paar minuten duren. Bij volgende keren volstaat `docker compose up -d`. Gebruik `--build` opnieuw als je de code of afhankelijkheden hebt aangepast.
 
 ## Stoppen
 
-Druk in de terminal op `Ctrl+C` en voer daarna uit:
+Voer uit:
 
 ```powershell
-Copy-Item .env.example .env
+docker compose down
 ```
 
 ## Hoe het project in elkaar zit
@@ -34,7 +34,7 @@ Copy-Item .env.example .env
 | Onderdeel | Bestand(en) | Taak |
 | --- | --- | --- |
 | Start en HTTP-routes | `Program.cs` | Registreert de onderdelen en biedt de pagina's en `/api/recommendations` aan. |
-| Data-inleeslaag | `Repositories/GameRepository.cs`, `Data/GameMap.cs`, `Models/Game.cs` | Leest `Data/games.csv` en zet CSV-kolommen om naar `Game`-objecten. |
+| Data-inleeslaag | `Repositories/GameRepository.cs`, `Data/GameMap.cs`, `Models/Game.cs` | Leest bij voorkeur `Data/games.csv`, anders de sample, en zet CSV-kolommen om naar `Game`-objecten. |
 | Aanbevelingen | `Services/BasicRecommender.cs` | Sorteert op het aantal reviews en geeft de 50 populairste spellen terug. |
 | Pagina's | `Components/Pages/Home.razor`, `Home.razor.cs`, `Library.razor` | Toont de spellen en beheert zoek-, sorteer-, carousel- en detailstatus. |
 | Vormgeving | `Styles/input.css`, `wwwroot/js/playr-scroll.js` | Bouwt Tailwind CSS en bedient de scrolnavigatie. |
@@ -51,4 +51,4 @@ npm run build:css
 dotnet run
 ```
 
-Ook hierbij moet `Data/games.csv` aanwezig zijn. De URL staat in de `dotnet run`-uitvoer. `npm run dev:css` houdt de CSS tijdens het aanpassen automatisch bij.
+Ook hierbij heeft `Data/games.csv` voorrang op `SampleData/games.csv`. De URL staat in de `dotnet run`-uitvoer. `npm run dev:css` houdt de CSS tijdens het aanpassen automatisch bij.

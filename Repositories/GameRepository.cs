@@ -11,12 +11,15 @@ namespace Playr.Repositories
 
         public GameRepository(IWebHostEnvironment environment)
         {
-            var csvPath = Path.Combine(environment.ContentRootPath, "Data", "games.csv");
-            if (!File.Exists(csvPath))
+            var fullPath = Path.Combine(environment.ContentRootPath, "Data", "games.csv");
+            var samplePath = Path.Combine(environment.ContentRootPath, "SampleData", "games.csv");
+            var csvPath = new[] { fullPath, samplePath }
+                .FirstOrDefault(File.Exists);
+
+            if (csvPath is null)
             {
                 throw new FileNotFoundException(
-                    "Data/games.csv ontbreekt. Zet de lokale dataset in de Data-map naast Playr.csproj.",
-                    csvPath);
+                    "Geen Steam-dataset gevonden. Verwacht Data/games.csv of SampleData/games.csv.");
             }
 
             using var reader = new StreamReader(csvPath);

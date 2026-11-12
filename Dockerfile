@@ -40,6 +40,7 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 EXPOSE 8080
 
 COPY --from=build /app/publish .
+COPY SampleData/games.csv /app/SampleData/games.csv
 
 # Run without root privileges.
 USER $APP_UID
