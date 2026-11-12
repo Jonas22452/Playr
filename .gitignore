@@ -12,8 +12,11 @@ obj/
 *.userosscache
 *.sln.docstates
 
-# Steam dataset
+# Ignore the full Steam dataset
 Data/*.csv
+
+# Allow the small sample dataset
+!Data/games_sample.csv
 
 # Environment / secrets
 .env
