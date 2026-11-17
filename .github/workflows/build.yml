@@ -32,11 +32,12 @@ jobs:
           dotnet restore Playr.sln
           dotnet build Playr.sln --no-restore --configuration Release
 
-      # De echte dataset staat niet in Git; de kleine voorbeeldset is genoeg voor de opstartcontrole.
+      # Kopieer de meegeleverde voorbeelddata naar de locatie die de backend verwacht.
       - name: Maak lokale CI-configuratie en data
         run: |
           cp .env.example .env
-          cp Data/games_sample.csv Data/games.csv
+          mkdir -p Data
+          cp SampleData/games.csv Data/games.csv
 
       - name: Bouw beide Docker-containers
         run: docker compose build
