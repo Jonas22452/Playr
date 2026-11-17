@@ -13,13 +13,23 @@ cd Playr
 
 Zet `games.csv` in de map `Data`, zodat het bestand op `Data/games.csv` staat. De data blijft lokaal en zit niet in de repository.
 
+Maak daarna zelf een `.env`-bestand aan op basis van het voorbeeld en vul je eigen gewenste poort in:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Open `.env` en pas `PLAYR_PORT` aan als je een andere vrije poort wilt. `.env.example` bevat alleen een voorbeeldwaarde; `.env` blijft lokaal en wordt niet gecommit.
+
 Start Playr de eerste keer met:
 
 ```powershell
 docker compose up --build
 ```
 
-Open daarna http://localhost:8080. De eerste build kan een paar minuten duren. Bij volgende keren volstaat `docker compose up`. Gebruik `--build` opnieuw als je de code of afhankelijkheden hebt aangepast.
+Open daarna `http://localhost:<PLAYR_PORT>` (met de voorbeeldwaarde: http://localhost:8080). De eerste build kan een paar minuten duren. Bij volgende keren volstaat `docker compose up`. Gebruik `--build` opnieuw als je de code of afhankelijkheden hebt aangepast.
+
+Docker start twee containers: `frontend` levert de statische bestanden en stuurt Blazor-verzoeken door; `backend` draait de C#-app en leest `Data/games.csv`.
 
 ## Stoppen
 
@@ -30,7 +40,3 @@ docker compose down
 ```
 
 Je `games.csv` blijft gewoon in `Data` staan.
-
-## Andere poort
-
-Wil je een andere poort dan 8080, kopieer `.env.example` naar `.env` en verander `PLAYR_PORT`. Het `.env`-bestand is lokaal en wordt niet gecommit.

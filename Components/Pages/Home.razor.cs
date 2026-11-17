@@ -172,7 +172,7 @@ public partial class Home
             return "Unknown";
         }
 
-        return game.Price.Value == 0 ? "Free" : $"€{game.Price.Value:0.00}";
+        return game.Price.Value == 0 ? "Free" : $"${game.Price.Value:0.00}";
     }
 
     private static IEnumerable<string> SplitValues(string? values)
