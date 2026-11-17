@@ -1,14 +1,67 @@
-name: Build
+name: Build and smoke test
 
 on:
   push:
   pull_request:
 
 jobs:
-  docker-build:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Haal de broncode op
         uses: actions/checkout@v4
-      - name: Bouw de volledige image
-        run: docker build --tag playr:ci .
+
+      - name: Installeer .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Installeer Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Bouw de frontend-CSS
+        run: |
+          npm ci
+          npm run build:css
+
+      - name: Herstel en bouw de C#-app
+        run: |
+          dotnet restore Playr.sln
+          dotnet build Playr.sln --no-restore --configuration Release
+
+      # De echte dataset staat niet in Git; de kleine voorbeeldset is genoeg voor de opstartcontrole.
+      - name: Maak lokale CI-configuratie en data
+        run: |
+          cp .env.example .env
+          cp Data/games_sample.csv Data/games.csv
+
+      - name: Bouw beide Docker-containers
+        run: docker compose build
+
+      - name: Start de applicatie
+        run: docker compose up -d
+
+      # Controleer de proxy, een statisch bestand en de aanbevelingen-API.
+      - name: Controleer de draaiende applicatie
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://localhost:8080/ > /dev/null; then
+              break
+            fi
+            sleep 2
+          done
+          curl --fail --silent http://localhost:8080/ > /dev/null
+          curl --fail --silent http://localhost:8080/app.css > /dev/null
+          curl --fail --silent http://localhost:8080/api/recommendations -o "$RUNNER_TEMP/recommendations.json"
+          grep -q 'appId' "$RUNNER_TEMP/recommendations.json"
+
+      - name: Toon containerlogs bij een fout
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Stop de containers
+        if: always()
+        run: docker compose down

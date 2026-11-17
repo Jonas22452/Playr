@@ -1,14 +1,23 @@
 services:
-  playr:
+  backend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.backend
 
-    ports:
-      - "${PLAYR_PORT:-8080}:8080"
-
+    # Only the frontend is reachable from the host; this port stays internal.
+    expose:
+      - "8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
 
     volumes:
       - ./Data:/app/Data:ro
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    depends_on:
+      - backend
+    ports:
+      - "${PLAYR_PORT:?Maak eerst .env aan op basis van .env.example}:80"

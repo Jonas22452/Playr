@@ -11,7 +11,15 @@ git clone https://github.com/Jonas22452/Playr.git
 cd Playr
 ```
 
-Wil je de volledige dataset gebruiken, zet dan `games.csv` in de map `Data`, zodat het bestand op `Data/games.csv` staat. Playr kiest dit bestand eerst. Zonder volledige dataset gebruikt Playr automatisch `SampleData/games.csv`. De volledige dataset blijft lokaal en wordt niet in de Docker-image of repository opgenomen.
+Zet `games.csv` in de map `Data`, zodat het bestand op `Data/games.csv` staat. De data blijft lokaal en zit niet in de repository.
+
+Maak daarna zelf een `.env`-bestand aan op basis van het voorbeeld en vul je eigen gewenste poort in:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Open `.env` en pas `PLAYR_PORT` aan als je een andere vrije poort wilt. `.env.example` bevat alleen een voorbeeldwaarde; `.env` blijft lokaal en wordt niet gecommit.
 
 Start Playr de eerste keer met:
 
@@ -19,7 +27,9 @@ Start Playr de eerste keer met:
 docker compose up --build -d
 ```
 
-Open daarna http://localhost:8080. De eerste build kan een paar minuten duren. Bij volgende keren volstaat `docker compose up -d`. Gebruik `--build` opnieuw als je de code of afhankelijkheden hebt aangepast.
+Open daarna `http://localhost:<PLAYR_PORT>` (met de voorbeeldwaarde: http://localhost:8080). De eerste build kan een paar minuten duren. Bij volgende keren volstaat `docker compose up`. Gebruik `--build` opnieuw als je de code of afhankelijkheden hebt aangepast.
+
+Docker start twee containers: `frontend` levert de statische bestanden en stuurt Blazor-verzoeken door; `backend` draait de C#-app en leest `Data/games.csv`.
 
 ## Stoppen
 
